@@ -64,40 +64,26 @@ export class DashboardComponent implements OnInit {
   }
 
   onEditItem(item: Item) {
-    this.router.navigate(['/item-form', item._id]);  // Navigate to edit page
+    this.router.navigate(['/item-form', item._id]);
   }
 
   onAddItem() {
-    this.router.navigate(['/item-form']);  // Navigate to add page
+    this.router.navigate(['/item-form']);
   }
 
-  onStartFair() {
-    this.fairService.startFair({
-      name: 'Current Fair',
-      startDate: new Date(),
-      endDate: new Date(),
-      active: true,
-      createdAt: new Date()
-    });
-  }
-
-  onEndFair() {
-    this.fairService.endFair();
+  onManageFairs() {
+    this.router.navigate(['/fairs']);
   }
 
   get fairButtonText(): string {
-    return this.activeFair ? '⏹️ End Fair' : '▶️ Start Fair';
+    return this.activeFair ? `⏹️ ${this.activeFair.name}` : '🎪 Manage Fairs';
   }
 
   get fairButtonClass(): string {
-    return this.activeFair ? 'btn-warning' : 'btn-success';
+    return this.activeFair ? 'btn-warning' : 'btn-secondary';
   }
 
   onFairButtonClick() {
-    if (this.activeFair) {
-      this.onEndFair();
-    } else {
-      this.onStartFair();
-    }
+    this.onManageFairs();
   }
 }

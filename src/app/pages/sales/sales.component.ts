@@ -1,13 +1,71 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
+import { Observable, combineLatest, map } from 'rxjs';
+import { Item } from '../../models/item';
+import { Fair } from '../../models/fair';
+import { InventoryService } from '../../services/inventory.service';
+import { FairService } from '../../services/fair.service';
 
 @Component({
   selector: 'app-sales',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './sales.component.html',
-  styleUrls: ['./sales.component.css']  
+  styleUrls: ['./sales.component.css']
 })
-export class SalesComponent {
-  constructor() {}
+export class SalesComponent implements OnInit {
+  soldItems$: Observable<Item[]>;
+  currentFair: Fair | null = null;
+  totalSales = 0;
+
+  constructor(
+    private inventoryService: InventoryService,
+    private fairService: FairService,
+    private route: ActivatedRoute
+  ) {
+    this.soldItems$ = new Observable();
+  }
+
+  ngOnInit() {
+    const fairId = this.route.snapshot.queryParams['fairId'];
+    
+    if (fairId) {
+      // Show sales for specific fair
+      this.currentFair = this.fairService.getFairById(fairId);
+      this.loadSalesForFair(fairId);
+    } else {
+      // Show sales for active fair
+      this.fairService.activeFair$.subscribe(fair => {
+        this.currentFair = fair;
+        if (fair) {
+          this.loadSalesForFair(fair._id!);
+        }
+      });
+    }
+  }
+
+  private loadSalesForFair(fairId: string) {
+    this.soldItems$ = this.inventoryService.getItems().pipe(
+      map(items => {
+        const soldItems = items.filter(item => 
+          item.soldAt && item.soldAt.fairId === fairId
+        );
+        
+        this.totalSales = soldItems.reduce((total, item) => total + item.price, 0);
+        return soldItems;
+      })
+    );
+  }
+
+  formatDate(date: Date): string {
+    return new Date(date).toLocaleDateString();
+  }
+
+  formatTime(date: Date): string {
+    return new Date(date).toLocaleTimeString([], { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+  }
 }

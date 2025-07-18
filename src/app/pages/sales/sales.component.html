@@ -1,10 +1,39 @@
 <div class="sales">
     <div class="main-content">
-      <div class="empty-state">
+      <div *ngIf="currentFair" class="sales-header">
+        <h2>{{ currentFair.name }}</h2>
+        <p class="fair-details">📍 {{ currentFair.city }} • {{ formatDate(currentFair.startDate) }}</p>
+        <div class="total-sales">
+          <span class="total-label">Total Sales:</span>
+          <span class="total-amount">${{ totalSales | number:'1.2-2' }}</span>
+        </div>
+      </div>
+  
+      <div *ngIf="!currentFair" class="no-fair-state">
         <div class="empty-icon">📊</div>
-        <h3>Sales Analytics</h3>
-        <p>Track your fair performance and best-selling items</p>
-        <small>Coming soon...</small>
+        <h3>No Active Fair</h3>
+        <p>Start a fair to see sales data</p>
+      </div>
+  
+      <div *ngIf="currentFair" class="sales-list">
+        <div *ngFor="let item of soldItems$ | async" class="sale-item">
+          <div class="sale-header">
+            <div class="item-name">{{ item.name }}</div>
+            <div class="sale-price">${{ item.price | number:'1.2-2' }}</div>
+          </div>
+          <div class="sale-details">
+            <span class="category">{{ item.category | titlecase }}</span>
+            <span class="sale-time">
+              {{ formatDate(item.soldAt!.date) }} at {{ formatTime(item.soldAt!.date) }}
+            </span>
+          </div>
+        </div>
+  
+        <div *ngIf="(soldItems$ | async)?.length === 0" class="empty-sales">
+          <div class="empty-icon">💰</div>
+          <h3>No Sales Yet</h3>
+          <p>Items sold during this fair will appear here</p>
+        </div>
       </div>
     </div>
-</div>
+  </div>

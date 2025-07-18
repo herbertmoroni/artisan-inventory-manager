@@ -1,8 +1,10 @@
 import { Routes } from '@angular/router';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { ImportListComponent } from './pages/import-list/import-list.component';
+import { FairsComponent } from './pages/fairs/fairs.component';
 import { SalesComponent } from './pages/sales/sales.component';
 import { ItemFormComponent } from './components/item-form/item-form.component';
+import { FairFormComponent } from './components/fair-form/fair-form.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
@@ -10,6 +12,9 @@ export const routes: Routes = [
   { path: 'item-form', component: ItemFormComponent },       
   { path: 'item-form/:id', component: ItemFormComponent },    
   { path: 'import', component: ImportListComponent },
+  { path: 'fairs', component: FairsComponent },
+  { path: 'fair-form', component: FairFormComponent },
+  { path: 'fair-form/:id', component: FairFormComponent },
   { path: 'sales', component: SalesComponent },
   { path: '**', redirectTo: '/dashboard' }
 ];

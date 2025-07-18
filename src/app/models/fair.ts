@@ -3,6 +3,7 @@
     _id?: string;
     userId?: string;
     name: string;
+    city: string;
     startDate: Date;
     endDate: Date;
     active: boolean;

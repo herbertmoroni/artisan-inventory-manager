@@ -1,0 +1,59 @@
+<div class="fairs">
+    <div class="main-content">
+      <div class="page-header">
+        <div class="header-text">
+          <h2>Craft Fairs</h2>
+          <span class="page-subtitle">Manage your fair events</span>
+        </div>
+        <button class="add-fair-btn" (click)="onAddFair()">
+          ➕ Add Fair
+        </button>
+      </div>
+      
+      <div *ngFor="let fair of fairs$ | async" class="fair-card">
+        <div class="fair-header">
+          <div class="fair-main-info">
+            <div class="fair-name">{{ fair.name }}</div>
+            <div class="fair-location">📍 {{ fair.city }}</div>
+          </div>
+          <div class="fair-status" [class.active]="fair.active">
+            {{ fair.active ? 'ACTIVE' : 'INACTIVE' }}
+          </div>
+        </div>
+        
+        <div class="fair-dates">
+          <span *ngIf="isSameDay(fair.startDate, fair.endDate)">
+            📅 {{ formatDate(fair.startDate) }}
+          </span>
+          <span *ngIf="!isSameDay(fair.startDate, fair.endDate)">
+            📅 {{ formatDate(fair.startDate) }} - {{ formatDate(fair.endDate) }}
+          </span>
+        </div>
+        
+        <div class="fair-actions">
+          <button class="fair-btn btn-edit" (click)="onEditFair(fair)">
+            ✏️ Edit
+          </button>
+          <button class="fair-btn btn-sales" (click)="onViewSales(fair)">
+            📊 Sales
+          </button>
+          <button *ngIf="!fair.active" 
+                  class="fair-btn btn-start" 
+                  (click)="onStartFair(fair)">
+            ▶️ Start
+          </button>
+          <button *ngIf="fair.active" 
+                  class="fair-btn btn-end" 
+                  (click)="onEndFair()">
+            ⏹️ End
+          </button>
+        </div>
+      </div>
+  
+      <div *ngIf="(fairs$ | async)?.length === 0" class="empty-state">
+        <div class="empty-icon">🎪</div>
+        <h3>No Fairs Yet</h3>
+        <p>Add your first craft fair to start tracking sales</p>
+      </div>
+    </div>
+  </div>
