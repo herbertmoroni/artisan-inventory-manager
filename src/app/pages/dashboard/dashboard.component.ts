@@ -1,16 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { Item, ItemCategory } from '../../models/item';
 import { InventoryService } from '../../services/inventory.service';
 import { FairService } from '../../services/fair.service';
 import { ItemCardComponent } from '../../components/item-card/item-card.component';
-import { ItemFormComponent } from '../../components/item-form/item-form.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, ItemCardComponent, ItemFormComponent],
+  imports: [CommonModule, ItemCardComponent],  
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
@@ -19,8 +19,7 @@ export class DashboardComponent implements OnInit {
   filteredItems$: Observable<Item[]>;
   searchTerm = '';
   selectedCategory: ItemCategory | null = null;
-  showAddModal = false;
-  activeFair: any = null; // Changed from Observable to simple property
+  activeFair: any = null;
 
   categories = [
     { value: null, label: 'All' },
@@ -31,7 +30,8 @@ export class DashboardComponent implements OnInit {
 
   constructor(
     private inventoryService: InventoryService,
-    private fairService: FairService
+    private fairService: FairService,
+    private router: Router  
   ) {
     this.items$ = this.inventoryService.getItems();
     this.filteredItems$ = this.items$;
@@ -39,7 +39,6 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit() {
     this.applyFilters();
-    // Subscribe to fair changes
     this.fairService.activeFair$.subscribe(fair => {
       this.activeFair = fair;
     });
@@ -65,20 +64,11 @@ export class DashboardComponent implements OnInit {
   }
 
   onEditItem(item: Item) {
-    console.log('Edit item:', item);
+    this.router.navigate(['/item-form', item._id]);  // Navigate to edit page
   }
 
   onAddItem() {
-    this.showAddModal = true;
-  }
-
-  onSaveItem(item: Item) {
-    this.inventoryService.addItem(item);
-    this.showAddModal = false;
-  }
-
-  onCancelAdd() {
-    this.showAddModal = false;
+    this.router.navigate(['/item-form']);  // Navigate to add page
   }
 
   onStartFair() {
@@ -95,7 +85,6 @@ export class DashboardComponent implements OnInit {
     this.fairService.endFair();
   }
 
-  // Helper method for template
   get fairButtonText(): string {
     return this.activeFair ? '⏹️ End Fair' : '▶️ Start Fair';
   }

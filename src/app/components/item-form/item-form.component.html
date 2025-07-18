@@ -1,53 +1,70 @@
-<div class="modal" [class.active]="isVisible" (click)="$event.target === $event.currentTarget && onCancel()">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>{{ item ? 'Edit Item' : 'Add Item' }}</h3>
+<div class="item-form-page">
+  <!-- Page Header -->
+  <div class="page-header">
+    <button class="back-btn" (click)="onCancel()">
+      ← Back
+    </button>
+    <h1 class="page-title">{{ pageTitle }}</h1>
+    <button class="save-btn" 
+            [disabled]="!itemForm.valid"
+            (click)="onSubmit()">
+      Save
+    </button>
+  </div>
+
+  <!-- Form Content -->
+  <div class="form-container">
+    <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
+      <!-- Photo Section -->
+      <div class="photo-section">
+        <div class="photo-area" (click)="triggerCamera()">
+          <img *ngIf="photoPreview" 
+               [src]="photoPreview" 
+               class="photo-preview" 
+               alt="Item photo">
+          <div *ngIf="!photoPreview" class="photo-placeholder">
+            <div class="camera-icon">📷</div>
+            <span>Tap to add photo</span>
+          </div>
+        </div>
+        <input type="file" 
+               id="cameraInput" 
+               accept="image/*" 
+               capture="camera" 
+               style="display: none;" 
+               (change)="onPhotoSelect($event)">
       </div>
-      <div class="modal-body">
-        <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
-          <div class="form-group">
-            <button type="button" class="camera-btn" (click)="triggerCamera()">
-              📷 Take Photo
-            </button>
-            <input type="file" 
-                   id="cameraInput" 
-                   accept="image/*" 
-                   capture="camera" 
-                   style="display: none;" 
-                   (change)="onPhotoSelect($event)">
-            <img *ngIf="photoPreview" 
-                 [src]="photoPreview" 
-                 class="photo-preview" 
-                 alt="Preview">
-          </div>
-          
-          <div class="form-group">
-            <label>Item Name</label>
-            <input type="text" 
-                   class="form-control" 
-                   formControlName="name"
-                   placeholder="Silver flower earrings">
-          </div>
-          
-          <div class="form-group">
-            <label>Category</label>
-            <select class="form-control" formControlName="category">
-              <option value="">Choose category...</option>
-              <option *ngFor="let category of categories" [value]="category">
-                {{ category | titlecase }}
-              </option>
-            </select>
-          </div>
-          
-          <div class="form-group">
-            <label>Description</label>
-            <textarea class="form-control" 
-                      rows="3" 
-                      formControlName="description"
-                      placeholder="Handmade with blue stones..."></textarea>
-          </div>
-          
-          <div class="form-group">
+      
+      <!-- Form Fields -->
+      <div class="form-section">
+        <div class="form-group">
+          <label>Item Name *</label>
+          <input type="text" 
+                 class="form-control" 
+                 formControlName="name"
+                 placeholder="Silver flower earrings">
+        </div>
+        
+        <div class="form-group">
+          <label>Category *</label>
+          <select class="form-control" formControlName="category">
+            <option value="">Choose category...</option>
+            <option *ngFor="let category of categories" [value]="category">
+              {{ category | titlecase }}
+            </option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label>Description</label>
+          <textarea class="form-control" 
+                    rows="3" 
+                    formControlName="description"
+                    placeholder="Handmade with blue stones..."></textarea>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group half">
             <label>Color/Material</label>
             <input type="text" 
                    class="form-control" 
@@ -55,46 +72,34 @@
                    placeholder="Silver/blue">
           </div>
           
-          <div class="form-group">
-            <label>Price ($)</label>
+          <div class="form-group half">
+            <label>Price ($) *</label>
             <input type="number" 
                    class="form-control" 
                    step="0.01" 
                    formControlName="price"
                    placeholder="25.00">
           </div>
-          
-          <div class="form-group">
-            <label>Quantity</label>
-            <input type="number" 
-                   class="form-control" 
-                   min="0" 
-                   formControlName="quantity"
-                   placeholder="2">
+        </div>
+        
+        <div class="form-group">
+          <label>Quantity *</label>
+          <input type="number" 
+                 class="form-control" 
+                 min="0" 
+                 formControlName="quantity"
+                 placeholder="2">
+        </div>
+        
+        <div class="form-group">
+          <div class="checkbox-group">
+            <input type="checkbox" 
+                   id="nextImport" 
+                   formControlName="nextImport">
+            <label for="nextImport">Add to next import list</label>
           </div>
-          
-          <div class="form-group">
-            <div class="checkbox-group">
-              <input type="checkbox" 
-                     id="nextImport" 
-                     formControlName="nextImport">
-              <label for="nextImport">Add to next import list</label>
-            </div>
-          </div>
-          
-          <div class="form-actions">
-            <button type="button" 
-                    class="form-btn form-btn-secondary" 
-                    (click)="onCancel()">
-              Cancel
-            </button>
-            <button type="submit" 
-                    class="form-btn form-btn-primary"
-                    [disabled]="!itemForm.valid">
-              {{ item ? 'Update' : 'Add' }} Item
-            </button>
-          </div>
-        </form>
+        </div>
       </div>
-    </div>
+    </form>
   </div>
+</div>

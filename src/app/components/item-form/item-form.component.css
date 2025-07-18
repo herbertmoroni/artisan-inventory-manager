@@ -1,102 +1,188 @@
-.modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    z-index: 1000;
+.item-form-page {
+  min-height: 100vh;
+  background: var(--background);
+  padding-bottom: 20px;
+}
+
+/* Page Header */
+.page-header {
+  background: var(--surface);
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 8px;
+}
+
+.page-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.save-btn {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.save-btn:disabled {
+  background: var(--text-light);
+  cursor: not-allowed;
+}
+
+/* Form Container */
+.form-container {
+  padding: 20px;
+}
+
+/* Photo Section */
+.photo-section {
+  margin-bottom: 30px;
+}
+
+.photo-area {
+  width: 100%;
+  height: 200px;
+  background: var(--surface);
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.photo-area:active {
+  transform: scale(0.98);
+}
+
+.photo-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo-placeholder {
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.camera-icon {
+  font-size: 2.5rem;
+  margin-bottom: 8px;
+  display: block;
+}
+
+/* Form Sections */
+.form-section {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group.half {
+  flex: 1;
+}
+
+.form-row {
+  display: flex;
+  gap: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+.form-control {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-size: 1rem;
+  background: var(--surface);
+  transition: border-color 0.2s;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+}
+
+.form-control::placeholder {
+  color: var(--text-light);
+}
+
+/* Checkbox */
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: var(--background);
+  border-radius: 8px;
+  border: 2px solid var(--border);
+}
+
+.checkbox-group input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--primary-color);
+}
+
+.checkbox-group label {
+  margin: 0;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .form-row {
+    flex-direction: column;
+    gap: 0;
   }
   
-  .modal.active {
-    display: block;
-  }
-  
-  .modal-content {
-    background: var(--surface);
-    margin: 50px auto;
-    padding: 0;
-    border-radius: 12px;
-    max-width: 350px;
-    width: 90%;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    max-height: 85vh;
-    overflow-y: auto;
-  }
-  
-  .modal-header {
-    padding: 20px;
-    background: var(--primary-color);
-    color: white;
-    border-radius: 12px 12px 0 0;
-    text-align: center;
-  }
-  
-  .modal-body {
-    padding: 20px;
-  }
-  
-  .camera-btn {
-    background: var(--primary-color);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 12px;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    font-weight: 500;
-    cursor: pointer;
-    margin-bottom: 16px;
-  }
-  
-  .photo-preview {
-    width: 100%;
-    max-height: 200px;
-    object-fit: cover;
-    border-radius: 8px;
-    margin-top: 8px;
-  }
-  
-  .checkbox-group {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  .page-header {
     padding: 12px 16px;
-    background: var(--background);
-    border-radius: 8px;
   }
   
-  .form-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 20px;
+  .form-container {
+    padding: 16px;
   }
   
-  .form-btn {
-    flex: 1;
-    padding: 12px;
-    border: none;
-    border-radius: 8px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.2s;
+  .page-title {
+    font-size: 1.1rem;
   }
-  
-  .form-btn-primary {
-    background: var(--primary-color);
-    color: white;
-  }
-  
-  .form-btn-primary:disabled {
-    background: var(--text-light);
-    cursor: not-allowed;
-  }
-  
-  .form-btn-secondary {
-    background: #6c757d;
-    color: white;
-  }
+}
