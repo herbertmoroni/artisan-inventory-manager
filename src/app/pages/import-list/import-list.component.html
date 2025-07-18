@@ -1,8 +1,15 @@
 <div class="import-list">
     <div class="main-content">
       <div class="page-header">
-        <h2>Import List</h2>
-        <span class="page-subtitle">Items to order from Brazil</span>
+        <div class="header-text">
+          <h2>Import List</h2>
+          <span class="page-subtitle">Items to order from Brazil</span>
+        </div>
+        <button *ngIf="(importItems$ | async)?.length! > 0" 
+                class="clear-all-btn" 
+                (click)="onClearAll()">
+          🗑️ Clear All
+        </button>
       </div>
       
       <div *ngFor="let item of importItems$ | async" class="import-item">
@@ -18,11 +25,8 @@
           </div>
         </div>
         <div class="import-actions">
-          <button class="item-btn btn-edit btn-small" (click)="onEditItem(item)">
+          <button class="item-btn btn-edit" (click)="onEditItem(item)">
             ✏️ Edit
-          </button>
-          <button class="item-btn btn-secondary btn-small" (click)="removeFromImportList(item)">
-            ❌ Remove
           </button>
         </div>
       </div>
@@ -31,6 +35,27 @@
         <div class="empty-icon">📦</div>
         <h3>No Import Items</h3>
         <p>Mark items for import when customers request them</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Clear All Confirmation Overlay -->
+  <div *ngIf="showClearConfirmation" class="confirmation-overlay" (click)="onCancelClear()">
+    <div class="confirmation-modal" (click)="$event.stopPropagation()">
+      <div class="confirmation-header">
+        <h3>Clear Import List</h3>
+      </div>
+      <div class="confirmation-body">
+        <p>Remove <strong>all items</strong> from your import list?</p>
+        <p class="warning-text">This action cannot be undone.</p>
+      </div>
+      <div class="confirmation-actions">
+        <button class="modal-btn btn-cancel" (click)="onCancelClear()">
+          ❌ Cancel
+        </button>
+        <button class="modal-btn btn-confirm" (click)="onConfirmClearAll()">
+          🗑️ Clear All
+        </button>
       </div>
     </div>
   </div>

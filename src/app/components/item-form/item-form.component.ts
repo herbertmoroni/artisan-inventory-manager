@@ -95,12 +95,18 @@ export class ItemFormComponent implements OnInit {
         this.inventoryService.addItem(item);
       }
 
-      this.router.navigate(['/dashboard']);
+      this.goBack();
     }
   }
 
   onCancel() {
-    this.router.navigate(['/dashboard']);
+    this.goBack();
+  }
+
+  private goBack() {
+    // Check if we came from import page
+    const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
+    this.router.navigate([returnUrl]);
   }
 
   triggerCamera() {

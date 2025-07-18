@@ -106,6 +106,15 @@ export class InventoryService {
     });
   }
 
+  clearImportList(): void {
+    const currentItems = this.itemsSubject.value;
+    const updatedItems = currentItems.map(item => ({
+      ...item,
+      nextImport: false
+    }));
+    this.itemsSubject.next(updatedItems);
+  }
+
   filterItems(searchTerm: string, category?: ItemCategory): Observable<Item[]> {
     return new Observable(observer => {
       this.items$.subscribe(items => {
