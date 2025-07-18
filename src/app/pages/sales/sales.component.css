@@ -2,8 +2,41 @@
     padding-bottom: 80px;
   }
   
+  .sales-header-bar {
+    background: var(--surface);
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    position: fixed;
+    top: 73px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 414px;
+    z-index: 100;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+  
+  .back-btn {
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 8px;
+  }
+  
+  .page-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+  }
+  
   .main-content {
-    padding: 20px;
+    padding: 170px 20px 20px;
   }
   
   .sales-header {

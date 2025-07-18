@@ -1,4 +1,10 @@
 <div class="sales">
+    <div class="sales-header-bar">
+      <button class="back-btn" (click)="goBack()">← Back</button>
+      <h1 class="page-title">Sales</h1>
+      <div></div>
+    </div>
+    
     <div class="main-content">
       <div *ngIf="currentFair" class="sales-header">
         <h2>{{ currentFair.name }}</h2>

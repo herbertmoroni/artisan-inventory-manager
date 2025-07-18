@@ -8,9 +8,11 @@ import { Item, ItemCategory } from '../models/item';
 export class InventoryService {
   private itemsSubject = new BehaviorSubject<Item[]>([]);
   public items$ = this.itemsSubject.asObservable();
+  
+  private salesSubject = new BehaviorSubject<Item[]>([]);
+  public sales$ = this.salesSubject.asObservable();
 
   constructor() {
-    // Initialize with mock data
     this.loadMockData();
   }
 
@@ -81,12 +83,19 @@ export class InventoryService {
     const item = currentItems.find(item => item._id === itemId);
     if (item && item.quantity > 0) {
       item.quantity -= 1;
-      if (fairId) {
-        item.soldAt = {
+      
+      // Create sale record
+      const saleItem: Item = {
+        ...item,
+        _id: Date.now().toString() + '_sale',
+        soldAt: {
           date: new Date(),
-          fairId: fairId
-        };
-      }
+          fairId: fairId || ''
+        }
+      };
+      
+      const currentSales = this.salesSubject.value;
+      this.salesSubject.next([...currentSales, saleItem]);
       this.itemsSubject.next([...currentItems]);
     }
   }
@@ -113,6 +122,26 @@ export class InventoryService {
       nextImport: false
     }));
     this.itemsSubject.next(updatedItems);
+  }
+
+  getSoldItemsForFair(fairId: string): Observable<Item[]> {
+    return new Observable(observer => {
+      this.sales$.subscribe(sales => {
+        const fairSales = sales.filter(sale => 
+          sale.soldAt && sale.soldAt.fairId === fairId
+        );
+        observer.next(fairSales);
+      });
+    });
+  }
+
+  getFairTotal(fairId: string): Observable<number> {
+    return new Observable(observer => {
+      this.getSoldItemsForFair(fairId).subscribe(soldItems => {
+        const total = soldItems.reduce((sum, item) => sum + item.price, 0);
+        observer.next(total);
+      });
+    });
   }
 
   filterItems(searchTerm: string, category?: ItemCategory): Observable<Item[]> {

@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { Fair } from '../../models/fair';
 import { FairService } from '../../services/fair.service';
+import { InventoryService } from '../../services/inventory.service';
 
 @Component({
   selector: 'app-fairs',
@@ -18,6 +19,7 @@ export class FairsComponent implements OnInit {
 
   constructor(
     private fairService: FairService,
+    private inventoryService: InventoryService,
     private router: Router
   ) {
     this.fairs$ = this.fairService.getFairs();
@@ -57,5 +59,9 @@ export class FairsComponent implements OnInit {
     const start = new Date(startDate);
     const end = new Date(endDate);
     return start.toDateString() === end.toDateString();
+  }
+
+  getFairTotal(fairId: string): Observable<number> {
+    return this.inventoryService.getFairTotal(fairId);
   }
 }

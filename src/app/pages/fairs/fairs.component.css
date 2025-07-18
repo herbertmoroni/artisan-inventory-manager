@@ -91,6 +91,16 @@
     margin-bottom: 16px;
   }
   
+  .fair-total {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: var(--success, #4caf50);
+    color: white;
+    border-radius: 6px;
+    font-weight: 600;
+    text-align: center;
+  }
+  
   .fair-actions {
     display: flex;
     gap: 8px;

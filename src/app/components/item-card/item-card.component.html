@@ -44,6 +44,8 @@
     </div>
     <div class="confirmation-body">
       <p>Sell <strong>{{ item.name }}</strong> for <strong>${{ item.price | number:'1.2-2' }}</strong>?</p>
+      <p *ngIf="activeFair" class="fair-info">Sale will be added to: <strong>{{ activeFair.name }}</strong></p>
+      <p *ngIf="!activeFair" class="no-fair-warning">⚠️ No active fair - sale won't be tracked</p>
       <p class="quantity-info">Remaining quantity will be: {{ item.quantity - 1 }}</p>
     </div>
     <div class="confirmation-actions">

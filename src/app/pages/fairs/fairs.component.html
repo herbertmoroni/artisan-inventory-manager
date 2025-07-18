@@ -28,6 +28,9 @@
           <span *ngIf="!isSameDay(fair.startDate, fair.endDate)">
             📅 {{ formatDate(fair.startDate) }} - {{ formatDate(fair.endDate) }}
           </span>
+          <div class="fair-total">
+            Total: ${{ (getFairTotal(fair._id!) | async) || 0 | number:'1.2-2' }}
+          </div>
         </div>
         
         <div class="fair-actions">

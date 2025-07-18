@@ -1,6 +1,8 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Item } from '../../models/item';
+import { FairService } from '../../services/fair.service';
+import { Fair } from '../../models/fair';
 
 @Component({
   selector: 'app-item-card',
@@ -9,12 +11,21 @@ import { Item } from '../../models/item';
   templateUrl: './item-card.component.html',
   styleUrls: ['./item-card.component.css']  
 })
-export class ItemCardComponent {
+export class ItemCardComponent implements OnInit {
   @Input() item!: Item;
   @Output() sellItem = new EventEmitter<Item>();
   @Output() editItem = new EventEmitter<Item>();
-
+  
   showConfirmation = false;
+  activeFair: Fair | null = null;
+
+  constructor(private fairService: FairService) {}
+
+  ngOnInit() {
+    this.fairService.activeFair$.subscribe(fair => {
+      this.activeFair = fair;
+    });
+  }
 
   onSell() {
     if (this.item.quantity > 0) {
