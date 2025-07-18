@@ -1,0 +1,36 @@
+<div class="import-list">
+    <div class="main-content">
+      <div class="page-header">
+        <h2>Import List</h2>
+        <span class="page-subtitle">Items to order from Brazil</span>
+      </div>
+      
+      <div *ngFor="let item of importItems$ | async" class="import-item">
+        <div class="import-item-header">
+          <div class="import-item-name">{{ item.name }}</div>
+          <div class="import-item-price">${{ item.price | number:'1.2-2' }}</div>
+        </div>
+        <div class="import-item-details">
+          {{ item.description }}
+          <div class="import-item-meta">
+            <span class="category-tag">{{ item.category }}</span>
+            <span class="quantity-info">Current qty: {{ item.quantity }}</span>
+          </div>
+        </div>
+        <div class="import-actions">
+          <button class="item-btn btn-edit btn-small" (click)="onEditItem(item)">
+            ✏️ Edit
+          </button>
+          <button class="item-btn btn-secondary btn-small" (click)="removeFromImportList(item)">
+            ❌ Remove
+          </button>
+        </div>
+      </div>
+  
+      <div *ngIf="(importItems$ | async)?.length === 0" class="empty-state">
+        <div class="empty-icon">📦</div>
+        <h3>No Import Items</h3>
+        <p>Mark items for import when customers request them</p>
+      </div>
+    </div>
+  </div>

@@ -1,0 +1,37 @@
+<div class="item-card" [class.sold-out]="item.quantity === 0">
+    <div class="item-image">
+      <img *ngIf="item.image" [src]="item.image" [alt]="item.name">
+      <div *ngIf="!item.image" class="item-image-placeholder">
+        📸
+        <span class="placeholder-text">{{ item.name }}</span>
+      </div>
+      <div class="item-price-overlay">${{ item.price | number:'1.2-2' }}</div>
+    </div>
+    
+    <div class="item-content">
+      <div class="item-header">
+        <div class="item-main-info">
+          <div class="item-name">{{ item.name }}</div>
+          <span class="item-category">{{ item.category }}</span>
+          <span *ngIf="item.nextImport" class="next-import-badge">Next Import</span>
+        </div>
+        <div class="item-quantity-badge">Qty: {{ item.quantity }}</div>
+      </div>
+      
+      <div class="item-description">{{ item.description }}</div>
+      
+      <div class="item-meta">
+        <span class="item-sku">SKU: {{ item._id?.slice(-6) }}</span>
+        <span [style.color]="stockColor" style="font-weight: 500;">{{ stockStatus }}</span>
+      </div>
+      
+      <div class="item-actions">
+        <button class="item-btn btn-sell" 
+                [disabled]="item.quantity === 0"
+                (click)="onSell()">
+          {{ item.quantity === 0 ? '✅ Sold Out' : '💰 Sell' }}
+        </button>
+        <button class="item-btn btn-edit" (click)="onEdit()">✏️ Edit</button>
+      </div>
+    </div>
+  </div>

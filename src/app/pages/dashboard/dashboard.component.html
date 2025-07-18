@@ -1,0 +1,47 @@
+<div class="dashboard">
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <button class="quick-btn btn-primary" (click)="onAddItem()">
+        ➕ Add Item
+      </button>
+      <button class="quick-btn" 
+              [class]="'quick-btn ' + fairButtonClass"
+              (click)="onFairButtonClick()">
+        {{ fairButtonText }}
+      </button>
+    </div>
+  
+    <!-- Search -->
+    <div class="search-container">
+      <input type="text" 
+             class="search-input" 
+             placeholder="Search items..." 
+             [value]="searchTerm"
+             (input)="onSearch($event)">
+    </div>
+  
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+      <div *ngFor="let category of categories"
+           class="filter-tab"
+           [class.active]="selectedCategory === category.value"
+           (click)="onCategoryFilter(category.value)">
+        {{ category.label }}
+      </div>
+    </div>
+  
+    <!-- Item List -->
+    <div class="main-content">
+      <app-item-card *ngFor="let item of filteredItems$ | async"
+                     [item]="item"
+                     (sellItem)="onSellItem($event)"
+                     (editItem)="onEditItem($event)">
+      </app-item-card>
+    </div>
+  
+    <!-- Add Item Modal -->
+    <app-item-form [isVisible]="showAddModal"
+                   (save)="onSaveItem($event)"
+                   (cancel)="onCancelAdd()">
+    </app-item-form>
+  </div>
