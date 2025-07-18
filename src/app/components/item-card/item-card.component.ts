@@ -14,10 +14,21 @@ export class ItemCardComponent {
   @Output() sellItem = new EventEmitter<Item>();
   @Output() editItem = new EventEmitter<Item>();
 
+  showConfirmation = false;
+
   onSell() {
     if (this.item.quantity > 0) {
-      this.sellItem.emit(this.item);
+      this.showConfirmation = true;
     }
+  }
+
+  onConfirmSell() {
+    this.sellItem.emit(this.item);
+    this.showConfirmation = false;
+  }
+
+  onCancelSell() {
+    this.showConfirmation = false;
   }
 
   onEdit() {
