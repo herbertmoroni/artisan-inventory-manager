@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const Fair = require('../models/Fair');
 const Sale = require('../models/Sale');
 
@@ -133,25 +134,28 @@ router.post('/:id/start', async (req, res) => {
 router.get('/:id/sales', async (req, res) => {
   try {
     const sales = await Sale.find({ fairId: req.params.id })
-      .populate('itemId', 'name category')
       .sort({ saleDate: -1 });
+    console.log(`📊 Found ${sales.length} sales for fair ${req.params.id}`);
     res.json(sales);
   } catch (error) {
+    console.error('❌ Error fetching fair sales:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// GET /api/fairs/:id/total - Get total sales amount for a fair
+// GET /api/fairs/:id/total - Get total sales amount for a fair (FIXED)
 router.get('/:id/total', async (req, res) => {
   try {
-    const result = await Sale.aggregate([
-      { $match: { fairId: mongoose.Types.ObjectId(req.params.id) } },
-      { $group: { _id: null, total: { $sum: '$price' } } }
-    ]);
+    console.log(`💰 Calculating total for fair: ${req.params.id}`);
     
-    const total = result.length > 0 ? result[0].total : 0;
+    // Use string comparison instead of ObjectId for compatibility
+    const sales = await Sale.find({ fairId: req.params.id });
+    const total = sales.reduce((sum, sale) => sum + sale.price, 0);
+    
+    console.log(`💰 Fair ${req.params.id} total: $${total} (${sales.length} sales)`);
     res.json({ total });
   } catch (error) {
+    console.error('❌ Error calculating fair total:', error);
     res.status(500).json({ error: error.message });
   }
 });

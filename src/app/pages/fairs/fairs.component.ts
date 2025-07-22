@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { Fair } from '../../models/fair';
 import { FairService } from '../../services/fair.service';
 import { InventoryService } from '../../services/inventory.service';
@@ -18,6 +18,7 @@ export class FairsComponent implements OnInit {
   activeFair: Fair | null = null;
   isLoading = false;
   fairOperations: { [key: string]: boolean } = {}; // Track loading per fair
+  fairTotals: { [key: string]: Observable<number> } = {}; // Cache totals
 
   constructor(
     private fairService: FairService,
@@ -31,6 +32,15 @@ export class FairsComponent implements OnInit {
     console.log('🎪 Fairs page loading...');
     this.fairService.activeFair$.subscribe(fair => {
       this.activeFair = fair;
+    });
+
+    // Load fair totals once when fairs are loaded
+    this.fairs$.subscribe(fairs => {
+      fairs.forEach(fair => {
+        if (fair._id && !this.fairTotals[fair._id]) {
+          this.fairTotals[fair._id] = this.inventoryService.getFairTotal(fair._id);
+        }
+      });
     });
   }
 
@@ -84,8 +94,9 @@ export class FairsComponent implements OnInit {
     return start.toDateString() === end.toDateString();
   }
 
+  // Fixed: Return cached Observable instead of creating new one each time
   getFairTotal(fairId: string): Observable<number> {
-    return this.inventoryService.getFairTotal(fairId);
+    return this.fairTotals[fairId] || of(0);
   }
 
   // Helper methods for button states

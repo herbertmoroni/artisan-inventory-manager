@@ -10,9 +10,9 @@
         <h2>{{ currentFair.name }}</h2>
         <p class="fair-details">📍 {{ currentFair.city }} • {{ formatDate(currentFair.startDate) }}</p>
         <div class="total-sales">
-          <span class="total-label">Total Sales:</span>
-          <span class="total-amount">${{ totalSales | number:'1.2-2' }}</span>
-        </div>
+            <span class="total-label">Total Sales:</span>
+            <span class="total-amount">${{ (fairTotal$ | async) || 0 | number:'1.2-2' }}</span>
+          </div>
       </div>
   
       <div *ngIf="!currentFair" class="no-fair-state">

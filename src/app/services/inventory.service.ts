@@ -11,9 +11,7 @@ export class InventoryService {
   private itemsSubject = new BehaviorSubject<Item[]>([]);
   public items$ = this.itemsSubject.asObservable();
   
-  private salesSubject = new BehaviorSubject<Item[]>([]);
-  public sales$ = this.salesSubject.asObservable();
-
+  // Remove sales subject - we'll get sales from API instead
   private readonly API_URL = 'http://localhost:3000/api';
 
   constructor(private http: HttpClient) {
@@ -158,17 +156,47 @@ export class InventoryService {
     console.log('📝 Mock clearImportList called - will be updated in Phase 2');
   }
 
+  // PHASE 3: Sales integration - Get sold items for a specific fair
   getSoldItemsForFair(fairId: string): Observable<Item[]> {
-    return this.sales$.pipe(
-      map(sales => sales.filter(sale => 
-        sale.soldAt && sale.soldAt.fairId === fairId
-      ))
+    return this.http.get<any[]>(`${this.API_URL}/fairs/${fairId}/sales`).pipe(
+      map(sales => {
+        console.log('📊 Raw sales data from API:', sales);
+        // Convert sales records to Item format for compatibility
+        return sales.map(sale => ({
+          _id: sale._id,
+          name: sale.itemName,
+          category: sale.category,
+          description: '',
+          color: '',
+          price: sale.price,
+          quantity: 1, // Each sale record represents 1 sold item
+          image: '',
+          nextImport: false,
+          dateAdded: new Date(sale.saleDate),
+          soldAt: {
+            date: new Date(sale.saleDate),
+            fairId: sale.fairId
+          }
+        } as Item));
+      }),
+      catchError(error => {
+        console.error('❌ Failed to get fair sales:', error);
+        return of([]); // Return empty array on error
+      })
     );
   }
 
+  // PHASE 3: Sales integration - Get fair total from API
   getFairTotal(fairId: string): Observable<number> {
-    return this.getSoldItemsForFair(fairId).pipe(
-      map(soldItems => soldItems.reduce((sum, item) => sum + item.price, 0))
+    return this.http.get<{total: number}>(`${this.API_URL}/fairs/${fairId}/total`).pipe(
+      map(response => {
+        console.log('💰 Fair total from API:', response);
+        return response.total || 0;
+      }),
+      catchError(error => {
+        console.error('❌ Failed to get fair total:', error);
+        return of(0); // Return 0 on error
+      })
     );
   }
 }
