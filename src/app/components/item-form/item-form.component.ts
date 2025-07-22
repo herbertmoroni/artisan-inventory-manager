@@ -19,7 +19,9 @@ export class ItemFormComponent implements OnInit {
   pageTitle = 'Add Item';
   isEditMode = false;
   currentItem: Item | null = null;
-  isSaving = false; 
+  isSaving = false; // Phase 2a: Loading state for save button
+  isDeleting = false; // Loading state for delete button
+  showDeleteConfirmation = false; // Delete confirmation modal
 
   constructor(
     private fb: FormBuilder,
@@ -72,12 +74,57 @@ export class ItemFormComponent implements OnInit {
   onPhotoSelect(event: any) {
     const file = event.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        this.photoPreview = e.target?.result as string;
-      };
-      reader.readAsDataURL(file);
+      // Compress image before converting to base64
+      this.compressImage(file).then(compressedDataUrl => {
+        this.photoPreview = compressedDataUrl;
+        console.log('📸 Image compressed and ready');
+      });
     }
+  }
+
+  // Simple image compression method
+  private compressImage(file: File): Promise<string> {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d')!;
+      const img = new Image();
+
+      img.onload = () => {
+        // Set max dimensions (adjust as needed)
+        const MAX_WIDTH = 800;
+        const MAX_HEIGHT = 600;
+        
+        let { width, height } = img;
+        
+        // Calculate new dimensions
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height = (height * MAX_WIDTH) / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width = (width * MAX_HEIGHT) / height;
+            height = MAX_HEIGHT;
+          }
+        }
+        
+        // Set canvas size
+        canvas.width = width;
+        canvas.height = height;
+        
+        // Draw and compress
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Convert to base64 with compression (0.8 = 80% quality)
+        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        console.log(`📊 Original: ${file.size} bytes, Compressed: ~${Math.round(compressedDataUrl.length * 0.75)} bytes`);
+        resolve(compressedDataUrl);
+      };
+
+      // Load the image
+      img.src = URL.createObjectURL(file);
+    });
   }
 
   // Phase 2a: Updated with async/await and loading state
@@ -85,8 +132,11 @@ export class ItemFormComponent implements OnInit {
     if (this.itemForm.valid && !this.isSaving) {
       this.isSaving = true;
       
+      // Disable form the Angular way
+      this.itemForm.disable();
+      
       try {
-        const formValue = this.itemForm.value;
+        const formValue = this.itemForm.getRawValue(); // Use getRawValue() to get disabled values too
         const item: Item = {
           ...formValue,
           _id: this.currentItem?._id,
@@ -97,9 +147,9 @@ export class ItemFormComponent implements OnInit {
         console.log('💾 Submitting item:', item);
 
         if (this.isEditMode) {
-          // Phase 2b: Will implement updateItem later
-          this.inventoryService.updateItem(item);
-          console.log('📝 Edit mode - using mock updateItem for now');
+          // Phase 2b: Real HTTP call for updating
+          await this.inventoryService.updateItem(item);
+          console.log('✅ Item updated successfully!');
         } else {
           // Phase 2a: Real HTTP call for adding
           await this.inventoryService.addItem(item);
@@ -113,6 +163,8 @@ export class ItemFormComponent implements OnInit {
         // Error already shown by service
       } finally {
         this.isSaving = false;
+        // Re-enable form
+        this.itemForm.enable();
       }
     }
   }
@@ -130,5 +182,36 @@ export class ItemFormComponent implements OnInit {
   triggerCamera() {
     const fileInput = document.getElementById('cameraInput') as HTMLInputElement;
     fileInput?.click();
+  }
+
+  // Delete functionality - only available in edit mode
+  onDelete() {
+    if (this.isEditMode && this.currentItem) {
+      this.showDeleteConfirmation = true;
+    }
+  }
+
+  async onConfirmDelete() {
+    if (this.currentItem && !this.isDeleting) {
+      this.isDeleting = true;
+      this.showDeleteConfirmation = false;
+      
+      try {
+        console.log('🗑️ Deleting item:', this.currentItem.name);
+        await this.inventoryService.deleteItem(this.currentItem._id!);
+        console.log('✅ Item deleted successfully!');
+        this.goBack();
+        
+      } catch (error) {
+        console.error('❌ Failed to delete item:', error);
+        // Error already shown by service
+      } finally {
+        this.isDeleting = false;
+      }
+    }
+  }
+
+  onCancelDelete() {
+    this.showDeleteConfirmation = false;
   }
 }

@@ -79,44 +79,67 @@ export class InventoryService {
     }
   }
 
-  updateItem(updatedItem: Item): void {
-    const currentItems = this.itemsSubject.value;
-    const index = currentItems.findIndex(item => item._id === updatedItem._id);
-    if (index !== -1) {
-      currentItems[index] = updatedItem;
-      this.itemsSubject.next([...currentItems]);
+  // PHASE 2b: Update item with HTTP call
+  async updateItem(updatedItem: Item): Promise<void> {
+    try {
+      console.log('✏️ Updating item via API:', updatedItem);
+      const updated = await this.http.put<Item>(`${this.API_URL}/items/${updatedItem._id}`, updatedItem).toPromise();
+      console.log('✅ Item updated successfully:', updated);
+      
+      // Update local state
+      const currentItems = this.itemsSubject.value;
+      const index = currentItems.findIndex(item => item._id === updatedItem._id);
+      if (index !== -1) {
+        currentItems[index] = updated!;
+        this.itemsSubject.next([...currentItems]);
+      }
+      
+    } catch (error) {
+      console.error('❌ Failed to update item:', error);
+      alert('Failed to update item. Please try again.');
+      throw error;
     }
-    console.log('📝 Mock updateItem called - will be updated in Phase 2');
   }
 
-  sellItem(itemId: string, fairId?: string): void {
-    const currentItems = this.itemsSubject.value;
-    const item = currentItems.find(item => item._id === itemId);
-    if (item && item.quantity > 0) {
-      item.quantity -= 1;
+  // PHASE 2c: Sell item with HTTP call
+  async sellItem(itemId: string, fairId?: string): Promise<void> {
+    try {
+      console.log('🛒 Selling item via API:', itemId, fairId);
+      const response = await this.http.post<any>(`${this.API_URL}/items/${itemId}/sell`, { fairId }).toPromise();
+      console.log('✅ Item sold successfully:', response);
       
-      // Create sale record
-      const saleItem: Item = {
-        ...item,
-        _id: Date.now().toString() + '_sale',
-        soldAt: {
-          date: new Date(),
-          fairId: fairId || ''
-        }
-      };
+      // Update local state - decrease quantity
+      const currentItems = this.itemsSubject.value;
+      const item = currentItems.find(item => item._id === itemId);
+      if (item) {
+        item.quantity = response.remainingQuantity;
+        this.itemsSubject.next([...currentItems]);
+      }
       
-      const currentSales = this.salesSubject.value;
-      this.salesSubject.next([...currentSales, saleItem]);
-      this.itemsSubject.next([...currentItems]);
+    } catch (error) {
+      console.error('❌ Failed to sell item:', error);
+      alert('Failed to sell item. Please try again.');
+      throw error;
     }
-    console.log('📝 Mock sellItem called - will be updated in Phase 2');
   }
 
-  deleteItem(itemId: string): void {
-    const currentItems = this.itemsSubject.value;
-    const filteredItems = currentItems.filter(item => item._id !== itemId);
-    this.itemsSubject.next(filteredItems);
-    console.log('📝 Mock deleteItem called - will be updated in Phase 2');
+  // PHASE 2d: Delete item with HTTP call
+  async deleteItem(itemId: string): Promise<void> {
+    try {
+      console.log('🗑️ Deleting item via API:', itemId);
+      await this.http.delete(`${this.API_URL}/items/${itemId}`).toPromise();
+      console.log('✅ Item deleted successfully');
+      
+      // Update local state
+      const currentItems = this.itemsSubject.value;
+      const filteredItems = currentItems.filter(item => item._id !== itemId);
+      this.itemsSubject.next(filteredItems);
+      
+    } catch (error) {
+      console.error('❌ Failed to delete item:', error);
+      alert('Failed to delete item. Please try again.');
+      throw error;
+    }
   }
 
   getImportList(): Observable<Item[]> {

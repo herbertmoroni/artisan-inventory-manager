@@ -61,13 +61,31 @@ export class DashboardComponent implements OnInit {
   }
 
   onSellItem(item: Item) {
-    console.log('🛒 Selling item (Phase 1 - mock):', item.name);
+    this.isLoading = true;
+    console.log('🛒 Selling item:', item.name);
     const activeFair = this.fairService.getActiveFair();
-    this.inventoryService.sellItem(item._id!, activeFair?._id);
+    
+    this.inventoryService.sellItem(item._id!, activeFair?._id)
+      .catch(error => {
+        // Error already handled by service
+        console.error('Sale failed:', error);
+      })
+      .finally(() => {
+        this.isLoading = false;
+      });
   }
 
   onEditItem(item: Item) {
     this.router.navigate(['/item-form', item._id]);
+  }
+
+  // Phase 2d: Add delete handler
+  onDeleteItem(item: Item) {
+    this.inventoryService.deleteItem(item._id!)
+      .catch(error => {
+        // Error already handled by service
+        console.error('Delete failed:', error);
+      });
   }
 
   onAddItem() {
