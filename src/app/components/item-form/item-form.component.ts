@@ -19,6 +19,7 @@ export class ItemFormComponent implements OnInit {
   pageTitle = 'Add Item';
   isEditMode = false;
   currentItem: Item | null = null;
+  isSaving = false; 
 
   constructor(
     private fb: FormBuilder,
@@ -79,23 +80,40 @@ export class ItemFormComponent implements OnInit {
     }
   }
 
-  onSubmit() {
-    if (this.itemForm.valid) {
-      const formValue = this.itemForm.value;
-      const item: Item = {
-        ...formValue,
-        _id: this.currentItem?._id,
-        image: this.photoPreview || this.currentItem?.image,
-        dateAdded: this.currentItem?.dateAdded || new Date()
-      };
+  // Phase 2a: Updated with async/await and loading state
+  async onSubmit() {
+    if (this.itemForm.valid && !this.isSaving) {
+      this.isSaving = true;
+      
+      try {
+        const formValue = this.itemForm.value;
+        const item: Item = {
+          ...formValue,
+          _id: this.currentItem?._id,
+          image: this.photoPreview || this.currentItem?.image,
+          dateAdded: this.currentItem?.dateAdded || new Date()
+        };
 
-      if (this.isEditMode) {
-        this.inventoryService.updateItem(item);
-      } else {
-        this.inventoryService.addItem(item);
+        console.log('💾 Submitting item:', item);
+
+        if (this.isEditMode) {
+          // Phase 2b: Will implement updateItem later
+          this.inventoryService.updateItem(item);
+          console.log('📝 Edit mode - using mock updateItem for now');
+        } else {
+          // Phase 2a: Real HTTP call for adding
+          await this.inventoryService.addItem(item);
+          console.log('✅ Item added successfully!');
+        }
+
+        this.goBack();
+        
+      } catch (error) {
+        console.error('❌ Failed to save item:', error);
+        // Error already shown by service
+      } finally {
+        this.isSaving = false;
       }
-
-      this.goBack();
     }
   }
 

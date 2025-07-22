@@ -61,17 +61,22 @@ export class InventoryService {
     );
   }
 
-  // TEMPORARY: Keep these methods as mock data for Phase 1
-  // We'll update these in Phase 2
-  addItem(item: Item): void {
-    const currentItems = this.itemsSubject.value;
-    const newItem = {
-      ...item,
-      _id: Date.now().toString(),
-      dateAdded: new Date()
-    };
-    this.itemsSubject.next([...currentItems, newItem]);
-    console.log('📝 Mock addItem called - will be updated in Phase 2');
+  // PHASE 2a: Add item with HTTP call
+  async addItem(item: Item): Promise<void> {
+    try {
+      console.log('➕ Adding item to API:', item);
+      const newItem = await this.http.post<Item>(`${this.API_URL}/items`, item).toPromise();
+      console.log('✅ Item added successfully:', newItem);
+      
+      // Update local state
+      const currentItems = this.itemsSubject.value;
+      this.itemsSubject.next([...currentItems, newItem!]);
+      
+    } catch (error) {
+      console.error('❌ Failed to add item:', error);
+      alert('Failed to add item. Please try again.');
+      throw error; // Let component handle it
+    }
   }
 
   updateItem(updatedItem: Item): void {
