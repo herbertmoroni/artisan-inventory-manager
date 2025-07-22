@@ -11,14 +11,12 @@ export class InventoryService {
   private itemsSubject = new BehaviorSubject<Item[]>([]);
   public items$ = this.itemsSubject.asObservable();
   
-  // Remove sales subject - we'll get sales from API instead
   private readonly API_URL = 'http://localhost:3000/api';
 
   constructor(private http: HttpClient) {
     this.loadItems();
   }
 
-  // PHASE 1: Replace this method with HTTP call
   private async loadItems() {
     try {
       const items = await this.http.get<Item[]>(`${this.API_URL}/items`).toPromise();
@@ -36,7 +34,7 @@ export class InventoryService {
     return this.items$;
   }
 
-  // PHASE 1: Keep client-side filtering for now
+  
   filterItems(searchTerm: string, category?: ItemCategory): Observable<Item[]> {
     return this.items$.pipe(
       map(items => {
@@ -59,7 +57,7 @@ export class InventoryService {
     );
   }
 
-  // PHASE 2a: Add item with HTTP call
+  
   async addItem(item: Item): Promise<void> {
     try {
       console.log('➕ Adding item to API:', item);
@@ -77,7 +75,7 @@ export class InventoryService {
     }
   }
 
-  // PHASE 2b: Update item with HTTP call
+  
   async updateItem(updatedItem: Item): Promise<void> {
     try {
       console.log('✏️ Updating item via API:', updatedItem);
@@ -99,7 +97,7 @@ export class InventoryService {
     }
   }
 
-  // PHASE 2c: Sell item with HTTP call
+  
   async sellItem(itemId: string, fairId?: string): Promise<void> {
     try {
       console.log('🛒 Selling item via API:', itemId, fairId);
@@ -121,7 +119,7 @@ export class InventoryService {
     }
   }
 
-  // PHASE 2d: Delete item with HTTP call
+  
   async deleteItem(itemId: string): Promise<void> {
     try {
       console.log('🗑️ Deleting item via API:', itemId);
@@ -140,33 +138,47 @@ export class InventoryService {
     }
   }
 
+  //  Get import items (client-side filter)
   getImportList(): Observable<Item[]> {
     return this.items$.pipe(
       map(items => items.filter(item => item.nextImport))
     );
   }
 
-  clearImportList(): void {
-    const currentItems = this.itemsSubject.value;
-    const updatedItems = currentItems.map(item => ({
-      ...item,
-      nextImport: false
-    }));
-    this.itemsSubject.next(updatedItems);
-    console.log('📝 Mock clearImportList called - will be updated in Phase 2');
+  // Clear import flags via API
+  async clearImportList(): Promise<void> {
+    try {
+      console.log('🧹 Clearing import list via API...');
+      const response = await this.http.post<any>(`${this.API_URL}/items/import/clear`, {}).toPromise();
+      console.log('✅ Import list cleared:', response);
+      
+      // Update local state - clear all nextImport flags
+      const currentItems = this.itemsSubject.value;
+      const updatedItems = currentItems.map(item => ({
+        ...item,
+        nextImport: false
+      }));
+      this.itemsSubject.next(updatedItems);
+      
+    } catch (error) {
+      console.error('❌ Failed to clear import list:', error);
+      alert('Failed to clear import list. Please try again.');
+      throw error;
+    }
   }
 
-  // PHASE 3: Sales integration - Get sold items for a specific fair
+  // Get sold items for a specific fair
   getSoldItemsForFair(fairId: string): Observable<Item[]> {
+    console.log('📊 Fetching sales for fair:', fairId);
     return this.http.get<any[]>(`${this.API_URL}/fairs/${fairId}/sales`).pipe(
       map(sales => {
         console.log('📊 Raw sales data from API:', sales);
-        // Convert sales records to Item format for compatibility
+        // Convert sales records to Item format for compatibility with existing components
         return sales.map(sale => ({
           _id: sale._id,
           name: sale.itemName,
           category: sale.category,
-          description: '',
+          description: sale.itemName, // Use name as description fallback
           color: '',
           price: sale.price,
           quantity: 1, // Each sale record represents 1 sold item
@@ -186,8 +198,9 @@ export class InventoryService {
     );
   }
 
-  // PHASE 3: Sales integration - Get fair total from API
+  // Get fair total from API
   getFairTotal(fairId: string): Observable<number> {
+    console.log('💰 Fetching total for fair:', fairId);
     return this.http.get<{total: number}>(`${this.API_URL}/fairs/${fairId}/total`).pipe(
       map(response => {
         console.log('💰 Fair total from API:', response);

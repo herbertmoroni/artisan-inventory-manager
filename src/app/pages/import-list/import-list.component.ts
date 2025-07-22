@@ -15,6 +15,7 @@ import { InventoryService } from '../../services/inventory.service';
 export class ImportListComponent implements OnInit {
   importItems$: Observable<Item[]>;
   showClearConfirmation = false;
+  isClearing = false; // Loading state for clear operation
 
   constructor(
     private inventoryService: InventoryService,
@@ -23,7 +24,9 @@ export class ImportListComponent implements OnInit {
     this.importItems$ = this.inventoryService.getImportList();
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    console.log('📦 Import List page loading...');
+  }
 
   onEditItem(item: Item) {
     this.router.navigate(['/item-form', item._id], { 
@@ -35,9 +38,22 @@ export class ImportListComponent implements OnInit {
     this.showClearConfirmation = true;
   }
 
-  onConfirmClearAll() {
-    this.inventoryService.clearImportList();
+  async onConfirmClearAll() {
+    if (this.isClearing) return; // Prevent double-click
+    
+    this.isClearing = true;
     this.showClearConfirmation = false;
+    
+    try {
+      console.log('🧹 Clearing import list...');
+      await this.inventoryService.clearImportList();
+      console.log('✅ Import list cleared successfully!');
+    } catch (error) {
+      console.error('❌ Failed to clear import list:', error);
+      // Error already shown by service
+    } finally {
+      this.isClearing = false;
+    }
   }
 
   onCancelClear() {

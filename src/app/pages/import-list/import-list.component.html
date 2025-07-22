@@ -7,8 +7,9 @@
         </div>
         <button *ngIf="(importItems$ | async)?.length! > 0" 
                 class="clear-all-btn" 
+                [disabled]="isClearing"
                 (click)="onClearAll()">
-          🗑️ Clear All
+          {{ isClearing ? 'Clearing...' : '🗑️ Clear All' }}
         </button>
       </div>
       
@@ -47,14 +48,15 @@
       </div>
       <div class="confirmation-body">
         <p>Remove <strong>all items</strong> from your import list?</p>
-        <p class="warning-text">This action cannot be undone.</p>
+        <p class="warning-text">This will clear the "next import" flag from all items.</p>
+        <p class="info-text">💡 Use this after placing your Brazil order</p>
       </div>
       <div class="confirmation-actions">
         <button class="modal-btn btn-cancel" (click)="onCancelClear()">
           ❌ Cancel
         </button>
         <button class="modal-btn btn-confirm" (click)="onConfirmClearAll()">
-          🗑️ Clear All
+          🧹 Clear All
         </button>
       </div>
     </div>

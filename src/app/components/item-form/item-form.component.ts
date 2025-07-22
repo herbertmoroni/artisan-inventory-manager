@@ -19,9 +19,9 @@ export class ItemFormComponent implements OnInit {
   pageTitle = 'Add Item';
   isEditMode = false;
   currentItem: Item | null = null;
-  isSaving = false; // Phase 2a: Loading state for save button
-  isDeleting = false; // Loading state for delete button
-  showDeleteConfirmation = false; // Delete confirmation modal
+  isSaving = false; 
+  isDeleting = false; 
+  showDeleteConfirmation = false; 
 
   constructor(
     private fb: FormBuilder,
@@ -127,7 +127,7 @@ export class ItemFormComponent implements OnInit {
     });
   }
 
-  // Phase 2a: Updated with async/await and loading state
+  // Updated with async/await and loading state
   async onSubmit() {
     if (this.itemForm.valid && !this.isSaving) {
       this.isSaving = true;
@@ -147,11 +147,11 @@ export class ItemFormComponent implements OnInit {
         console.log('💾 Submitting item:', item);
 
         if (this.isEditMode) {
-          // Phase 2b: Real HTTP call for updating
+          // HTTP call for updating
           await this.inventoryService.updateItem(item);
           console.log('✅ Item updated successfully!');
         } else {
-          // Phase 2a: Real HTTP call for adding
+          // HTTP call for adding
           await this.inventoryService.addItem(item);
           console.log('✅ Item added successfully!');
         }

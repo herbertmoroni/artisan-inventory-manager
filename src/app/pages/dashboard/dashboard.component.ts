@@ -20,7 +20,7 @@ export class DashboardComponent implements OnInit {
   searchTerm = '';
   selectedCategory: ItemCategory | null = null;
   activeFair: any = null;
-  isLoading = false; // Phase 1: Simple loading state
+  isLoading = false; 
 
   categories = [
     { value: null, label: 'All' },
@@ -79,7 +79,7 @@ export class DashboardComponent implements OnInit {
     this.router.navigate(['/item-form', item._id]);
   }
 
-  // Phase 2d: Add delete handler
+  // Add delete handler
   onDeleteItem(item: Item) {
     this.inventoryService.deleteItem(item._id!)
       .catch(error => {

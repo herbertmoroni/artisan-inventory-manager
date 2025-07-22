@@ -17,8 +17,10 @@ router.get('/', async (req, res) => {
 router.get('/import/list', async (req, res) => {
   try {
     const importItems = await Item.find({ nextImport: true });
+    console.log(`📦 Found ${importItems.length} items marked for import`);
     res.json(importItems);
   } catch (error) {
+    console.error('❌ Error fetching import items:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -26,12 +28,18 @@ router.get('/import/list', async (req, res) => {
 // POST /api/items/import/clear - Clear all import flags (MOVE BEFORE /:id)
 router.post('/import/clear', async (req, res) => {
   try {
-    await Item.updateMany(
+    console.log('🧹 Clearing all import flags...');
+    const result = await Item.updateMany(
       { nextImport: true },
       { nextImport: false }
     );
-    res.json({ message: 'Import list cleared successfully' });
+    console.log(`✅ Cleared import flags from ${result.modifiedCount} items`);
+    res.json({ 
+      message: 'Import list cleared successfully',
+      clearedCount: result.modifiedCount
+    });
   } catch (error) {
+    console.error('❌ Error clearing import flags:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -54,8 +62,10 @@ router.post('/', async (req, res) => {
   try {
     const item = new Item(req.body);
     const savedItem = await item.save();
+    console.log(`✅ Item created: ${savedItem.name}`);
     res.status(201).json(savedItem);
   } catch (error) {
+    console.error('❌ Error creating item:', error);
     res.status(400).json({ error: error.message });
   }
 });
@@ -71,8 +81,10 @@ router.put('/:id', async (req, res) => {
     if (!item) {
       return res.status(404).json({ error: 'Item not found' });
     }
+    console.log(`✅ Item updated: ${item.name}`);
     res.json(item);
   } catch (error) {
+    console.error('❌ Error updating item:', error);
     res.status(400).json({ error: error.message });
   }
 });
@@ -84,8 +96,10 @@ router.delete('/:id', async (req, res) => {
     if (!item) {
       return res.status(404).json({ error: 'Item not found' });
     }
+    console.log(`✅ Item deleted: ${item.name}`);
     res.json({ message: 'Item deleted successfully' });
   } catch (error) {
+    console.error('❌ Error deleting item:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -118,14 +132,17 @@ router.post('/:id/sell', async (req, res) => {
         price: item.price
       });
       await sale.save();
+      console.log(`💰 Sale recorded: ${item.name} for $${item.price} at fair ${fairId}`);
     }
     
+    console.log(`🛒 Item sold: ${item.name}, remaining quantity: ${item.quantity}`);
     res.json({ 
       message: 'Item sold successfully',
       item: item,
       remainingQuantity: item.quantity
     });
   } catch (error) {
+    console.error('❌ Error selling item:', error);
     res.status(500).json({ error: error.message });
   }
 });
