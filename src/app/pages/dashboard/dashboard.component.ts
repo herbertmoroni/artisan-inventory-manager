@@ -20,6 +20,7 @@ export class DashboardComponent implements OnInit {
   searchTerm = '';
   selectedCategory: ItemCategory | null = null;
   activeFair: any = null;
+  isLoading = false; // Phase 1: Simple loading state
 
   categories = [
     { value: null, label: 'All' },
@@ -38,6 +39,7 @@ export class DashboardComponent implements OnInit {
   }
 
   ngOnInit() {
+    console.log('📊 Dashboard loading...');
     this.applyFilters();
     this.fairService.activeFair$.subscribe(fair => {
       this.activeFair = fair;
@@ -59,6 +61,7 @@ export class DashboardComponent implements OnInit {
   }
 
   onSellItem(item: Item) {
+    console.log('🛒 Selling item (Phase 1 - mock):', item.name);
     const activeFair = this.fairService.getActiveFair();
     this.inventoryService.sellItem(item._id!, activeFair?._id);
   }

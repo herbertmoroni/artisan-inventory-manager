@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { Item, ItemCategory } from '../models/item';
 
 @Injectable({
@@ -12,53 +14,55 @@ export class InventoryService {
   private salesSubject = new BehaviorSubject<Item[]>([]);
   public sales$ = this.salesSubject.asObservable();
 
-  constructor() {
-    this.loadMockData();
+  private readonly API_URL = 'http://localhost:3000/api';
+
+  constructor(private http: HttpClient) {
+    this.loadItems();
   }
 
-  private loadMockData() {
-    const mockItems: Item[] = [
-      {
-        _id: '1',
-        name: 'Silver Flower Earrings',
-        category: ItemCategory.EARRINGS,
-        description: 'Handmade silver with blue stone accents from Brazil',
-        color: 'silver/blue',
-        price: 25.00,
-        quantity: 2,
-        nextImport: false,
-        dateAdded: new Date()
-      },
-      {
-        _id: '2',
-        name: 'Golden Grass Bracelet',
-        category: ItemCategory.BRACELETS,
-        description: 'Traditional Brazilian golden grass weave pattern',
-        color: 'golden',
-        price: 35.00,
-        quantity: 1,
-        nextImport: true,
-        dateAdded: new Date()
-      },
-      {
-        _id: '3',
-        name: 'Colorful Beaded Necklace',
-        category: ItemCategory.NECKLACES,
-        description: 'Natural stones and colorful beads in traditional pattern',
-        color: 'multicolor',
-        price: 45.00,
-        quantity: 3,
-        nextImport: false,
-        dateAdded: new Date()
-      }
-    ];
-    this.itemsSubject.next(mockItems);
+  // PHASE 1: Replace this method with HTTP call
+  private async loadItems() {
+    try {
+      const items = await this.http.get<Item[]>(`${this.API_URL}/items`).toPromise();
+      console.log('✅ Loaded items from API:', items);
+      this.itemsSubject.next(items || []);
+    } catch (error) {
+      console.error('❌ Failed to load items:', error);
+      alert('Failed to load items. Please check if server is running on localhost:3000');
+      // Fallback to empty array
+      this.itemsSubject.next([]);
+    }
   }
 
   getItems(): Observable<Item[]> {
     return this.items$;
   }
 
+  // PHASE 1: Keep client-side filtering for now
+  filterItems(searchTerm: string, category?: ItemCategory): Observable<Item[]> {
+    return this.items$.pipe(
+      map(items => {
+        let filteredItems = items;
+        
+        if (category) {
+          filteredItems = filteredItems.filter(item => item.category === category);
+        }
+        
+        if (searchTerm) {
+          const term = searchTerm.toLowerCase();
+          filteredItems = filteredItems.filter(item => 
+            item.name.toLowerCase().includes(term) ||
+            item.description.toLowerCase().includes(term)
+          );
+        }
+        
+        return filteredItems;
+      })
+    );
+  }
+
+  // TEMPORARY: Keep these methods as mock data for Phase 1
+  // We'll update these in Phase 2
   addItem(item: Item): void {
     const currentItems = this.itemsSubject.value;
     const newItem = {
@@ -67,6 +71,7 @@ export class InventoryService {
       dateAdded: new Date()
     };
     this.itemsSubject.next([...currentItems, newItem]);
+    console.log('📝 Mock addItem called - will be updated in Phase 2');
   }
 
   updateItem(updatedItem: Item): void {
@@ -76,6 +81,7 @@ export class InventoryService {
       currentItems[index] = updatedItem;
       this.itemsSubject.next([...currentItems]);
     }
+    console.log('📝 Mock updateItem called - will be updated in Phase 2');
   }
 
   sellItem(itemId: string, fairId?: string): void {
@@ -98,21 +104,20 @@ export class InventoryService {
       this.salesSubject.next([...currentSales, saleItem]);
       this.itemsSubject.next([...currentItems]);
     }
+    console.log('📝 Mock sellItem called - will be updated in Phase 2');
   }
 
   deleteItem(itemId: string): void {
     const currentItems = this.itemsSubject.value;
     const filteredItems = currentItems.filter(item => item._id !== itemId);
     this.itemsSubject.next(filteredItems);
+    console.log('📝 Mock deleteItem called - will be updated in Phase 2');
   }
 
   getImportList(): Observable<Item[]> {
-    return new Observable(observer => {
-      this.items$.subscribe(items => {
-        const importItems = items.filter(item => item.nextImport);
-        observer.next(importItems);
-      });
-    });
+    return this.items$.pipe(
+      map(items => items.filter(item => item.nextImport))
+    );
   }
 
   clearImportList(): void {
@@ -122,47 +127,20 @@ export class InventoryService {
       nextImport: false
     }));
     this.itemsSubject.next(updatedItems);
+    console.log('📝 Mock clearImportList called - will be updated in Phase 2');
   }
 
   getSoldItemsForFair(fairId: string): Observable<Item[]> {
-    return new Observable(observer => {
-      this.sales$.subscribe(sales => {
-        const fairSales = sales.filter(sale => 
-          sale.soldAt && sale.soldAt.fairId === fairId
-        );
-        observer.next(fairSales);
-      });
-    });
+    return this.sales$.pipe(
+      map(sales => sales.filter(sale => 
+        sale.soldAt && sale.soldAt.fairId === fairId
+      ))
+    );
   }
 
   getFairTotal(fairId: string): Observable<number> {
-    return new Observable(observer => {
-      this.getSoldItemsForFair(fairId).subscribe(soldItems => {
-        const total = soldItems.reduce((sum, item) => sum + item.price, 0);
-        observer.next(total);
-      });
-    });
-  }
-
-  filterItems(searchTerm: string, category?: ItemCategory): Observable<Item[]> {
-    return new Observable(observer => {
-      this.items$.subscribe(items => {
-        let filteredItems = items;
-        
-        if (category) {
-          filteredItems = filteredItems.filter(item => item.category === category);
-        }
-        
-        if (searchTerm) {
-          const term = searchTerm.toLowerCase();
-          filteredItems = filteredItems.filter(item => 
-            item.name.toLowerCase().includes(term) ||
-            item.description.toLowerCase().includes(term)
-          );
-        }
-        
-        observer.next(filteredItems);
-      });
-    });
+    return this.getSoldItemsForFair(fairId).pipe(
+      map(soldItems => soldItems.reduce((sum, item) => sum + item.price, 0))
+    );
   }
 }
