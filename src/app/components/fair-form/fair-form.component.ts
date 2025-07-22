@@ -17,6 +17,9 @@ export class FairFormComponent implements OnInit {
   pageTitle = 'Add Fair';
   isEditMode = false;
   currentFair: Fair | null = null;
+  isSaving = false;
+  isDeleting = false;
+  showDeleteConfirmation = false;
 
   constructor(
     private fb: FormBuilder,
@@ -85,26 +88,42 @@ export class FairFormComponent implements OnInit {
     }
   }
 
-  onSubmit() {
-    if (this.fairForm.valid) {
-      const formValue = this.fairForm.value;
-      const fair: Fair = {
-        _id: this.currentFair?._id,
-        name: formValue.name,
-        city: formValue.city,
-        startDate: new Date(formValue.startDate),
-        endDate: new Date(formValue.endDate),
-        active: this.currentFair?.active || false,
-        createdAt: this.currentFair?.createdAt || new Date()
-      };
+  async onSubmit() {
+    if (this.fairForm.valid && !this.isSaving) {
+      this.isSaving = true;
+      this.fairForm.disable();
+      
+      try {
+        const formValue = this.fairForm.getRawValue();
+        const fair: Fair = {
+          _id: this.currentFair?._id,
+          name: formValue.name,
+          city: formValue.city,
+          startDate: new Date(formValue.startDate),
+          endDate: new Date(formValue.endDate),
+          active: this.currentFair?.active || false,
+          createdAt: this.currentFair?.createdAt || new Date()
+        };
 
-      if (this.isEditMode) {
-        this.fairService.updateFair(fair);
-      } else {
-        this.fairService.addFair(fair);
+        console.log('💾 Submitting fair:', fair);
+
+        if (this.isEditMode) {
+          await this.fairService.updateFair(fair);
+          console.log('✅ Fair updated successfully!');
+        } else {
+          await this.fairService.addFair(fair);
+          console.log('✅ Fair added successfully!');
+        }
+
+        this.goBack();
+        
+      } catch (error) {
+        console.error('❌ Failed to save fair:', error);
+        // Error already shown by service
+      } finally {
+        this.isSaving = false;
+        this.fairForm.enable();
       }
-
-      this.goBack();
     }
   }
 
@@ -115,5 +134,36 @@ export class FairFormComponent implements OnInit {
   private goBack() {
     const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/fairs';
     this.router.navigate([returnUrl]);
+  }
+
+  // Delete functionality - only available in edit mode
+  onDelete() {
+    if (this.isEditMode && this.currentFair) {
+      this.showDeleteConfirmation = true;
+    }
+  }
+
+  async onConfirmDelete() {
+    if (this.currentFair && !this.isDeleting) {
+      this.isDeleting = true;
+      this.showDeleteConfirmation = false;
+      
+      try {
+        console.log('🗑️ Deleting fair:', this.currentFair.name);
+        await this.fairService.deleteFair(this.currentFair._id!);
+        console.log('✅ Fair deleted successfully!');
+        this.goBack();
+        
+      } catch (error) {
+        console.error('❌ Failed to delete fair:', error);
+        // Error already shown by service
+      } finally {
+        this.isDeleting = false;
+      }
+    }
+  }
+
+  onCancelDelete() {
+    this.showDeleteConfirmation = false;
   }
 }

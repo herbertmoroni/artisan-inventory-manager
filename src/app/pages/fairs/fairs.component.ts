@@ -16,6 +16,8 @@ import { InventoryService } from '../../services/inventory.service';
 export class FairsComponent implements OnInit {
   fairs$: Observable<Fair[]>;
   activeFair: Fair | null = null;
+  isLoading = false;
+  fairOperations: { [key: string]: boolean } = {}; // Track loading per fair
 
   constructor(
     private fairService: FairService,
@@ -26,6 +28,7 @@ export class FairsComponent implements OnInit {
   }
 
   ngOnInit() {
+    console.log('🎪 Fairs page loading...');
     this.fairService.activeFair$.subscribe(fair => {
       this.activeFair = fair;
     });
@@ -39,12 +42,32 @@ export class FairsComponent implements OnInit {
     this.router.navigate(['/fair-form', fair._id]);
   }
 
-  onStartFair(fair: Fair) {
-    this.fairService.startFair(fair._id!);
+  async onStartFair(fair: Fair) {
+    if (this.fairOperations[fair._id!]) return; // Prevent double-click
+    
+    this.fairOperations[fair._id!] = true;
+    try {
+      await this.fairService.startFair(fair._id!);
+      console.log('✅ Fair started:', fair.name);
+    } catch (error) {
+      console.error('❌ Failed to start fair:', error);
+    } finally {
+      this.fairOperations[fair._id!] = false;
+    }
   }
 
-  onEndFair() {
-    this.fairService.endFair();
+  async onEndFair() {
+    if (this.isLoading) return;
+    
+    this.isLoading = true;
+    try {
+      await this.fairService.endFair();
+      console.log('✅ Fair ended');
+    } catch (error) {
+      console.error('❌ Failed to end fair:', error);
+    } finally {
+      this.isLoading = false;
+    }
   }
 
   onViewSales(fair: Fair) {
@@ -63,5 +86,18 @@ export class FairsComponent implements OnInit {
 
   getFairTotal(fairId: string): Observable<number> {
     return this.inventoryService.getFairTotal(fairId);
+  }
+
+  // Helper methods for button states
+  isFairLoading(fairId: string): boolean {
+    return !!this.fairOperations[fairId];
+  }
+
+  getStartButtonText(fair: Fair): string {
+    return this.isFairLoading(fair._id!) ? 'Starting...' : '▶️ Start';
+  }
+
+  getEndButtonText(): string {
+    return this.isLoading ? 'Ending...' : '⏹️ End';
   }
 }

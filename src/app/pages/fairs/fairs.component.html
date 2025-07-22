@@ -42,13 +42,15 @@
           </button>
           <button *ngIf="!fair.active" 
                   class="fair-btn btn-start" 
+                  [disabled]="isFairLoading(fair._id!)"
                   (click)="onStartFair(fair)">
-            ▶️ Start
+            {{ getStartButtonText(fair) }}
           </button>
           <button *ngIf="fair.active" 
                   class="fair-btn btn-end" 
+                  [disabled]="isLoading"
                   (click)="onEndFair()">
-            ⏹️ End
+            {{ getEndButtonText() }}
           </button>
         </div>
       </div>
@@ -59,4 +61,4 @@
         <p>Add your first craft fair to start tracking sales</p>
       </div>
     </div>
-  </div>
+</div>

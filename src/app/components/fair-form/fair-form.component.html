@@ -5,11 +5,19 @@
         ← Back
       </button>
       <h1 class="page-title">{{ pageTitle }}</h1>
-      <button class="save-btn" 
-              [disabled]="!fairForm.valid"
-              (click)="onSubmit()">
-        Save
-      </button>
+      <div class="header-actions">
+        <button *ngIf="isEditMode" 
+                class="delete-btn" 
+                [disabled]="isDeleting"
+                (click)="onDelete()">
+          {{ isDeleting ? 'Deleting...' : '🗑️ Delete' }}
+        </button>
+        <button class="save-btn" 
+                [disabled]="!fairForm.valid || isSaving"
+                (click)="onSubmit()">
+          {{ isSaving ? 'Saving...' : 'Save' }}
+        </button>
+      </div>
     </div>
   
     <!-- Form Content -->
@@ -62,4 +70,28 @@
         </div>
       </form>
     </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div *ngIf="showDeleteConfirmation" class="confirmation-overlay" (click)="onCancelDelete()">
+  <div class="confirmation-modal" (click)="$event.stopPropagation()">
+    <div class="confirmation-header">
+      <h3>Delete Fair</h3>
+    </div>
+    <div class="confirmation-body">
+      <p>Permanently delete <strong>{{ currentFair?.name }}</strong>?</p>
+      <p class="location-info">Location: {{ currentFair?.city }}</p>
+      <p style="color: var(--danger); font-weight: 500;">⚠️ This will also delete all associated sales data</p>
+    </div>
+    <div class="confirmation-actions">
+      <button class="modal-btn btn-cancel" (click)="onCancelDelete()">
+        ❌ Cancel
+      </button>
+      <button class="modal-btn btn-confirm" 
+              style="background: var(--danger, #f44336);"
+              (click)="onConfirmDelete()">
+        🗑️ Delete Forever
+      </button>
+    </div>
   </div>
+</div>
